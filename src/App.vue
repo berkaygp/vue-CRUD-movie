@@ -14,7 +14,7 @@
             class="p-button-rounded ml-2"
             label="Delete"
             icon="pi pi-trash"
-            @click="openModal4"
+            @click="openConfirmModal2"
             :disabled="!selectedMovies || !selectedMovies.length"
           />
         </template>
@@ -44,7 +44,6 @@
         :rows="10"
         showGridlines
         class="p-datatable-sm"
-        :first="firstRecordIndex"
         v-model:filters="filters"
         v-model:selection="selectedMovies"
         filterDisplay="menu"
@@ -99,7 +98,7 @@
               class="ml-3"
               icon="pi pi-trash"
               style="height: 1.7rem"
-              @click="openModal3(slotProps.data)"
+              @click="openConfirmModal(slotProps.data)"
             ></Button>
           </template>
         </Column>
@@ -110,65 +109,24 @@
     </div>
     <div class="p-3 info">
       Muhammet Berkay Garip
-      <a href="https://www.linkedin.com/in/mbgarip/" target="_blank"><i class="pi pi-linkedin text-blue-700"></i></a>
+      <a href="https://www.linkedin.com/in/mbgarip/" target="_blank"
+        ><i class="pi pi-linkedin text-blue-700"></i
+      ></a>
     </div>
   </div>
   <Dialog
-    header="Add Movie"
+    header="Movie Info"
     v-model:visible="displayModal"
     :breakpoints="{ '960px': '75vw', '640px': '90vw' }"
     :style="{ width: '50vw' }"
-    @update:visible="cleanForm"
+    @update:visible="clearForm"
     class="p-fluid"
   >
-  <div class="formgrid grid">
-    <div class="field col-12 md:col-6 pt-2 mt-3">
-      <span class="p-float-label">
-        <InputText id="inputtext" type="text" v-model="titleValue" />
-        <label for="inputtext">Title</label>
-      </span>
-    </div>
-    <div class="field col md:col-6 pt-2 mt-3">
-      <span class="p-float-label">
-        <InputText id="inputtext" type="text" v-model="directorValue" />
-        <label for="inputtext">Director</label>
-      </span>
-    </div>
-  </div>  
-  <div class="formgrid grid">
-    <div class="field col pt-3">
-      <label for="minmax-buttons">Year</label>
-      <InputNumber
-        inputId="minmax-buttons"
-        v-model="yearValue"
-        mode="decimal"
-        showButtons
-        :min="1980"
-        :max="2022"
-      />
-    </div>
-    <div class="field col pl-8 mx-auto">
-      <p>Rating</p>
-      <Rating v-model="ratingValue" :cancel="false" name="cancel" />
-    </div>
-    <div class="field col ">
-      <p>Genre</p>
-      <Dropdown
-        v-model="genreValue"
-        :options="genres"
-        placeholder="Select a Genre"
-      />
-    </div>
-  </div>
-  <div class="pl-2">
-      <p>Actors</p>
-      <Textarea v-model="actorsValue" :autoResize="true" rows="3"/>
-    </div>
-  <div class="pl-2">
-      <p>Plot</p>
-      <Textarea v-model="plotValue" :autoResize="true" rows="3"/>
-    </div>
-
+    <InsideDialog
+      @onSave="onClickAddProduct"
+      :chosenMovie="selectedMovie"
+      ref="editModal"
+    ></InsideDialog>
     <template #footer>
       <Button
         label="Cancel"
@@ -176,89 +134,13 @@
         @click="closeModal"
         class="p-button-text"
       />
-      <Button label="Apply" icon="pi pi-check" @click="addMovie" autofocus />
-    </template>
-  </Dialog>
-
-  <Dialog
-    header="Edit Movie Info"
-    v-model:visible="displayModal2"
-    :breakpoints="{ '960px': '75vw', '640px': '90vw' }"
-    :style="{ width: '50vw' }"
-    class="p-fluid"
-  >
-  <div class="formgrid grid">
-    <div class="field col-12 md:col-6 pt-2 mt-3">
-      <span class="p-float-label">
-        <InputText id="inputtext" type="text" v-model="movie.title" />
-        <label for="inputtext">Title</label>
-      </span>
-    </div>
-    <div class="field col-12 md:col-6 pt-2 mt-3">
-      <span class="p-float-label">
-        <InputText id="inputtext" type="text" v-model="movie.director" />
-        <label for="inputtext">Director</label>
-      </span>
-    </div>
-  </div>
-  <div class="formgrid grid">
-    <div class="field col pt-3">
-      <label for="minmax-buttons">Year</label>
-      <InputNumber
-        inputId="minmax-buttons"
-        v-model="movie.year"
-        mode="decimal"
-        showButtons
-        :min="1980"
-        :max="2022"
-      />
-    </div>
-    <div class="field col pl-8 mx-auto">
-      <p>Rating</p>
-      <Rating v-model="movie.rating" :cancel="false" name="cancel" />
-    </div>
-    <div class="field col">
-      <p>Genre</p>
-      <div class="mb-4">
-        <Dropdown
-        v-model="movie.genre"
-        :options="genres"
-        placeholder="Select a Genre"
-      />
-      </div>
-      
-    </div>
-  </div>
-  <div>
-    <div>
-      <p>Actors</p>
-      <Textarea v-model="movie.actors" :autoResize="true" rows="3"/>
-    </div>
-    
-    <div >
-      <p>Plot</p>
-      <Textarea v-model="movie.plot" :autoResize="true" rows="3"/>
-    </div>
-  </div>  
-    <template #footer>
-      <Button
-        label="Cancel"
-        icon="pi pi-times"
-        @click="closeModal2"
-        class="p-button-text"
-      />
-      <Button
-        label="Apply"
-        icon="pi pi-check"
-        @click="saveMovieInfo"
-        autofocus
-      />
+      <Button label="Apply" icon="pi pi-check" @click="addMovie" />
     </template>
   </Dialog>
 
   <Dialog
     header="Confirm Deletion"
-    v-model:visible="displayModal3"
+    v-model:visible="displayConfirmModal"
     :style="{ width: '450px' }"
   >
     <div>
@@ -270,7 +152,7 @@
         label="No"
         icon="pi pi-times"
         class="p-button-text"
-        @click="displayModal3 = false"
+        @click="displayConfirmModal = false"
       />
       <Button
         label="Yes"
@@ -283,7 +165,7 @@
 
   <Dialog
     header="Confirm Deletion"
-    v-model:visible="displayModal4"
+    v-model:visible="displayConfirmModal2"
     :style="{ width: '450px' }"
   >
     <div>
@@ -295,7 +177,7 @@
         label="No"
         icon="pi pi-times"
         class="p-button-text"
-        @click="displayModal4 = false"
+        @click="displayConfirmModal2 = false"
       />
       <Button
         label="Yes"
@@ -309,27 +191,11 @@
 
 <script>
 import { FilterMatchMode } from "primevue/api";
+import InsideDialog from "./components/InsideDialog.vue";
 
 export default {
   data() {
     return {
-      filters: null,
-      selectedMovies: null,
-      displayModal: false,
-      displayModal2: false,
-      displayModal3: false,
-      displayModal4: false,
-      data: [],
-      movie: {},
-      genres: [
-        "Action",
-        "Comedy",
-        "Drama",
-        "Horror",
-        "Sci-fi",
-        "Adventure",
-        "Crime",
-      ],
       titleValue: "",
       directorValue: "",
       actorsValue: "",
@@ -337,8 +203,17 @@ export default {
       ratingValue: 1,
       plotValue: "",
       genreValue: "",
+      selectedMovie: [],
+      filters: null,
+      selectedMovies: null,
+      displayModal: false,
+      displayConfirmModal: false,
+      displayConfirmModal2: false,
+      data: [],
+      movie: {},
     };
   },
+  components: { InsideDialog },
   created() {
     this.initFilters();
   },
@@ -359,7 +234,7 @@ export default {
     exportCSV() {
       this.$refs.dt.exportCSV();
     },
-    cleanForm() {
+    clearForm() {
       this.titleValue = "";
       this.directorValue = "";
       this.actorsValue = "";
@@ -368,53 +243,51 @@ export default {
       this.plotValue = "";
       this.genreValue = "";
     },
-    openModal() {
-      this.cleanForm();
+    openModal(event) {
+      if (event.id) {
+        this.selectedMovie = event;
+      } else {
+        this.selectedMovie = {
+          id: null,
+          title: this.titleValue,
+          director: this.directorValue,
+          actors: this.actorsValue,
+          year: this.yearValue,
+          rating: this.ratingValue,
+          plot: this.plotValue,
+          genre: this.genreValue,
+        };
+      }
+      this.clearForm();
       this.displayModal = true;
     },
     closeModal() {
       this.displayModal = false;
     },
-    openModal2(movie) {
-      this.movie = { ...movie };
-      this.displayModal2 = true;
-    },
-    closeModal2() {
-      this.displayModal2 = false;
-    },
-    openModal3(movie) {
+    openConfirmModal(movie) {
       this.movie = movie;
-      this.displayModal3 = true;
+      this.displayConfirmModal = true;
     },
-    openModal4(movie) {
+    openConfirmModal2(movie) {
       this.movie = movie;
-      this.displayModal4 = true;
+      this.displayConfirmModal2 = true;
     },
     addMovie() {
-      this.data.push({
-        id: this.createId(),
-        title: this.titleValue,
-        director: this.directorValue,
-        actors: this.actorsValue,
-        year: this.yearValue,
-        rating: this.ratingValue,
-        plot: this.plotValue,
-        genre: this.genreValue,
-      });
+      this.$refs.editModal.save();
       this.titleValue = "";
       this.directorValue = "";
-      this.yearValue = "";
-      this.ratingValue = "";
+      this.yearValue = 1980;
+      this.ratingValue = 1;
       this.genreValue = "";
       this.displayModal = false;
     },
     deleteMovie() {
       this.data = this.data.filter((val) => val.title !== this.movie.title);
-      this.displayModal3 = false;
+      this.displayConfirmModal = false;
     },
     deleteSelectedMovies() {
       this.data = this.data.filter((val) => !this.selectedMovies.includes(val));
-      this.displayModal4 = false;
+      this.displayConfirmModal2 = false;
       this.selectedMovies = null;
     },
     createId() {
@@ -436,15 +309,6 @@ export default {
       }
       return index;
     },
-    saveMovieInfo() {
-      if (this.movie.id) {
-        this.data[this.findIndexById(this.movie.id)] = this.movie;
-      } else {
-        this.movie.id = this.createId();
-        this.data.push(this.movie);
-      }
-      this.closeModal2();
-    },
     clearFilter1() {
       this.initFilters();
     },
@@ -452,6 +316,31 @@ export default {
       this.filters = {
         global: { value: null, matchMode: FilterMatchMode.CONTAINS },
       };
+    },
+    onClickAddProduct(newMovie) {
+      if (newMovie.id) {
+        this.data[this.findIndexById(newMovie.id)] = {
+          id: newMovie.id,
+          title: newMovie.titleValue,
+          director: newMovie.directorValue,
+          actors: newMovie.actorsValue,
+          year: newMovie.yearValue,
+          rating: newMovie.ratingValue,
+          plot: newMovie.plotValue,
+          genre: newMovie.genreValue,
+        };
+      } else {
+        this.data.push({
+          id: this.createId(),
+          title: newMovie.titleValue,
+          director: newMovie.directorValue,
+          actors: newMovie.actorsValue,
+          year: newMovie.yearValue,
+          rating: newMovie.ratingValue,
+          plot: newMovie.plotValue,
+          genre: newMovie.genreValue,
+        });
+      }
     },
   },
 };
@@ -468,6 +357,11 @@ export default {
 }
 
 info {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
+    Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+}
+
+.required {
+  color: red;
 }
 </style>

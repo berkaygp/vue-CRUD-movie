@@ -91,7 +91,7 @@
               type="button"
               icon="pi pi-pencil"
               style="height: 1.7rem"
-              @click="openModal2(slotProps.data)"
+              @click="openModal(slotProps.data)"
             ></Button>
             <Button
               type="button"
